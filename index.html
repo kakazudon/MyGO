@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGO!!!!! 台詞搜尋</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #searchBox { width: 80%; padding: 10px; margin: 20px 0; font-size: 16px; }
+        #results { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .result-item { display: flex; flex-direction: column; align-items: center; }
+        img { width: 400px; margin: 10px; border-radius: 10px; }
+        .button-container { display: flex; gap: 10px; margin-top: 5px; }
+        button { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>MyGO!!!!! 台詞搜尋</h1>
+    <input type="text" id="searchBox" placeholder="輸入關鍵字搜尋">
+    <div id="results"></div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let images = [];
+
+        fetch("assets/data.json")
+            .then(response => response.json())
+            .then(data => {
+                images = data;
+            });
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.style.display = "block";
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 2000);
+        }
+
+        document.getElementById("searchBox").addEventListener("blur", function() {
+            const query = this.value.trim();
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = ""; // 清空舊結果
+
+            if (query === "") return;
+
+            const filtered = images.filter(filename => filename.includes(query));
+
+            filtered.sort((a, b) => {
+                const episodeA = a.match(/episode(\d{2})/);
+                const episodeB = b.match(/episode(\d{2})/);
+                return episodeA && episodeB ? episodeA[1] - episodeB[1] : 0;
+            });
+
+            filtered.forEach(filename => {
+                const container = document.createElement("div");
+                container.className = "result-item";
+                
+                const img = document.createElement("img");
+                img.src = `images/${filename}`;
+                img.alt = filename;
+                
+                const buttonContainer = document.createElement("div");
+                buttonContainer.className = "button-container";
+                
+                const copyButton = document.createElement("button");
+                copyButton.textContent = "複製圖片";
+                copyButton.addEventListener("click", () => {
+                    fetch(img.src)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            return new Promise(resolve => {
+                                const canvas = document.createElement("canvas");
+                                const ctx = canvas.getContext("2d");
+                                const image = new Image();
+                                image.onload = () => {
+                                    canvas.width = image.width;
+                                    canvas.height = image.height;
+                                    ctx.drawImage(image, 0, 0);
+                                    canvas.toBlob(resolve, "image/png");
+                                };
+                                image.src = URL.createObjectURL(blob);
+                            });
+                        })
+                        .then(pngBlob => {
+                            navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })])
+                                .then(() => showToast("圖片已複製到剪貼簿"))
+                                .catch(err => showToast("複製失敗: " + err));
+                        });
+                });
+                
+                const downloadButton = document.createElement("button");
+                downloadButton.textContent = "下載圖片";
+                downloadButton.addEventListener("click", () => {
+                    const a = document.createElement("a");
+                    a.href = img.src;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+                
+                buttonContainer.appendChild(copyButton);
+                buttonContainer.appendChild(downloadButton);
+                
+                container.appendChild(img);
+                container.appendChild(buttonContainer);
+                resultsDiv.appendChild(container);
+            });
+        });
+    </script>
+</body>
+</html>
