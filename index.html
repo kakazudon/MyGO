@@ -355,7 +355,10 @@
                 item.className = 'result-item';
 
                 const img = document.createElement('img');
-                img.src = `src/assets/images/${filename}`;
+
+                const encodedFilename = encodeURIComponent(filename); //處理一些不支持的字元
+
+                img.src = `src/assets/images/${encodedFilename}`;
                 img.alt = filename;
 
                 img.onerror = () => {
