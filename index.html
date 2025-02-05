@@ -4,14 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyGO!!!!! 台詞搜尋</title>
+    <!-- Font Awesome 圖標庫 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #searchBox { width: 80%; padding: 10px; margin: 20px 0; font-size: 16px; }
-        #results { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .result-item { display: flex; flex-direction: column; align-items: center; }
-        img { width: 400px; margin: 10px; border-radius: 10px; }
-        .button-container { display: flex; gap: 10px; margin-top: 5px; }
-        button { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0;
+            padding: 20px;
+            background: #3388BB;
+            color: white;
+        }
+
+        #searchContainer {
+            width: 80%;           /* 需設定寬度 */
+            max-width: 600px;     /* 最大寬度限制 */
+            margin: 0 auto;       /* 水平置中關鍵 */
+            padding: 20px;
+            text-align: center;   /* 內容文字置中 */
+        }
+
+        #searchBox {
+            width: 50%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        #results { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 10px; 
+        }
+        
+        .result-item {
+            position: relative;
+            margin: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .result-item:hover {
+            transform: scale(1.10); /* 放大 5% */
+            z-index: 100; /* 確保放大時覆蓋其他元素 */
+        }
+        
+        .result-item img {
+            width: 400px;
+            border-radius: 10px;
+        }
+        
+        .button-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .result-item:hover .button-container {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .icon-btn:hover {
+            background: #44aaff;
+            transform: scale(1.1);
+        }
+        
         .toast {
             position: fixed;
             bottom: 20px;
@@ -23,23 +104,107 @@
             border-radius: 5px;
             display: none;
         }
+
+        /* 圖片放大預覽樣式 */
+        .preview-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+
+        .preview-image {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            animation: imageZoom 0.3s ease;
+        }
+
+        .close-preview {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .close-preview:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes imageZoom {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* 手機版樣式 */
+        @media (max-width: 768px) {
+            #searchBox {
+                width: 80%;
+            }
+            
+            .result-item img {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .icon-btn {
+                width: 30px;
+                height: 30px;
+            }
+
+            .preview-image {
+                max-width: 100%;
+                max-height: 70%;
+            }
+            
+            .close-preview {
+                top: 10px;
+                right: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>MyGO!!!!! 台詞搜尋</h1>
-    <input type="text" id="searchBox" placeholder="輸入關鍵字搜尋">
+    <div id="searchContainer">
+        <h1>MyGO!!!!! 台詞搜尋</h1>
+        <input type="text" id="searchBox" placeholder="輸入關鍵字...">
+    </div>
+
     <div id="results"></div>
     <div id="toast" class="toast"></div>
 
     <script>
         let images = [];
 
-        fetch("assets/data.json")
-            .then(response => response.json())
-            .then(data => {
-                images = data;
-            });
-
+        // 顯示提示訊息
         function showToast(message) {
             const toast = document.getElementById("toast");
             toast.textContent = message;
@@ -49,77 +214,142 @@
             }, 2000);
         }
 
-        document.getElementById("searchBox").addEventListener("blur", function() {
-            const query = this.value.trim();
+        // 複製圖片功能
+        async function copyImage(img) {
+            fetch(img.src)
+                .then(response => response.blob())
+                .then(blob => {
+                    return new Promise(resolve => {
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+                        const image = new Image();
+                        image.onload = () => {
+                            canvas.width = image.width;
+                            canvas.height = image.height;
+                            ctx.drawImage(image, 0, 0);
+                            canvas.toBlob(resolve, "image/png");
+                        };
+                        image.src = URL.createObjectURL(blob);
+                    });
+                })
+                .then(pngBlob => {
+                    navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })])
+                        .then(() => showToast("圖片已複製到剪貼簿"))
+                        .catch(err => showToast("複製失敗: " + err));
+                });
+        }
+
+        // 下載圖片功能
+        function downloadImage(imgSrc, filename) {
+            const link = document.createElement('a');
+            link.href = imgSrc;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function createPreview(imageSrc) {
+            // 創建預覽層
+            const overlay = document.createElement('div');
+            overlay.className = 'preview-overlay';
+            
+            // 放大圖片
+            const img = document.createElement('img');
+            img.src = imageSrc;
+            img.className = 'preview-image';
+            
+            // 關閉按鈕
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-preview';
+            closeBtn.innerHTML = '×';
+            
+            // 組合元素
+            overlay.appendChild(img);
+            overlay.appendChild(closeBtn);
+            document.body.appendChild(overlay);
+            
+            // 關閉功能
+            const closePreview = () => {
+                overlay.remove();
+                document.body.style.overflow = 'auto';
+            };
+            
+            // 點擊事件
+            overlay.addEventListener('click', (e) => {
+                if(e.target === overlay || e.target === closeBtn) {
+                    closePreview();
+                }
+            });
+            
+            // ESC 鍵關閉
+            document.addEventListener('keydown', (e) => {
+                if(e.key === 'Escape') closePreview();
+            });
+            
+            // 禁止背景滾動
+            document.body.style.overflow = 'hidden';
+        }
+
+
+        // 搜尋功能
+        document.getElementById("searchBox").addEventListener("input", function() {
+            const query = this.value.trim().toLowerCase();
             const resultsDiv = document.getElementById("results");
-            resultsDiv.innerHTML = ""; // 清空舊結果
+            resultsDiv.innerHTML = "";
 
-            if (query === "") return;
+            if (!query) return;
 
-            const filtered = images.filter(filename => filename.includes(query));
+            const filtered = images.filter(filename => 
+                filename.toLowerCase().includes(query)
+            );
 
             filtered.sort((a, b) => {
-                const episodeA = a.match(/episode(\d{2})/);
-                const episodeB = b.match(/episode(\d{2})/);
-                return episodeA && episodeB ? episodeA[1] - episodeB[1] : 0;
+                const epA = a.match(/episode(\d+)/)?.[1] || 0;
+                const epB = b.match(/episode(\d+)/)?.[1] || 0;
+                return epA - epB;
             });
 
             filtered.forEach(filename => {
-                const container = document.createElement("div");
-                container.className = "result-item";
-                
-                const img = document.createElement("img");
+                const item = document.createElement('div');
+                item.className = 'result-item';
+
+                const img = document.createElement('img');
                 img.src = `images/${filename}`;
                 img.alt = filename;
-                
-                const buttonContainer = document.createElement("div");
-                buttonContainer.className = "button-container";
-                
-                const copyButton = document.createElement("button");
-                copyButton.textContent = "複製圖片";
-                copyButton.addEventListener("click", () => {
-                    fetch(img.src)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            return new Promise(resolve => {
-                                const canvas = document.createElement("canvas");
-                                const ctx = canvas.getContext("2d");
-                                const image = new Image();
-                                image.onload = () => {
-                                    canvas.width = image.width;
-                                    canvas.height = image.height;
-                                    ctx.drawImage(image, 0, 0);
-                                    canvas.toBlob(resolve, "image/png");
-                                };
-                                image.src = URL.createObjectURL(blob);
-                            });
-                        })
-                        .then(pngBlob => {
-                            navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })])
-                                .then(() => showToast("圖片已複製到剪貼簿"))
-                                .catch(err => showToast("複製失敗: " + err));
-                        });
+
+                img.addEventListener('click', () => {
+                    createPreview(img.src);
                 });
-                
-                const downloadButton = document.createElement("button");
-                downloadButton.textContent = "下載圖片";
-                downloadButton.addEventListener("click", () => {
-                    const a = document.createElement("a");
-                    a.href = img.src;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-                
-                buttonContainer.appendChild(copyButton);
-                buttonContainer.appendChild(downloadButton);
-                
-                container.appendChild(img);
-                container.appendChild(buttonContainer);
-                resultsDiv.appendChild(container);
+
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'button-container';
+
+                // 複製按鈕
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'icon-btn';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                copyBtn.onclick = () => copyImage(img);
+
+                // 下載按鈕
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'icon-btn';
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+                downloadBtn.onclick = () => downloadImage(img.src, filename);
+
+                btnContainer.appendChild(copyBtn);
+                btnContainer.appendChild(downloadBtn);
+                item.appendChild(img);
+                item.appendChild(btnContainer);
+                resultsDiv.appendChild(item);
             });
         });
+
+        // 初始化載入資料
+        fetch("assets/data.json")
+            .then(response => response.json())
+            .then(data => images = data)
+            .catch(() => showToast("無法載入資料"));
     </script>
 </body>
 </html>
