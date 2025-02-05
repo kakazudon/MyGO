@@ -10,7 +10,6 @@
         body { 
             font-family: 'Segoe UI', Arial, sans-serif; 
             margin: 0;
-            padding: 20px;
             background: #3388BB;
             color: white;
         }
@@ -24,7 +23,7 @@
         }
 
         #searchBox {
-            width: 50%;
+            width: 100%;
             padding: 15px;
             font-size: 16px;
             border: 2px solid #ffffff;
@@ -44,19 +43,17 @@
         .result-item {
             position: relative;
             margin: 10px;
-            border-radius: 10px;
             overflow: hidden;
             transition: transform 0.3s;
         }
         
         .result-item:hover {
-            transform: scale(1.10); /* 放大 5% */
+            transform: scale(1.10); /* hover放大 */
             z-index: 100; /* 確保放大時覆蓋其他元素 */
         }
         
         .result-item img {
             width: 400px;
-            border-radius: 10px;
         }
         
         .button-container {
@@ -79,7 +76,7 @@
             height: 36px;
             border: none;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.7);
+            background: #004488;
             color: white;
             cursor: pointer;
             display: flex;
@@ -95,10 +92,10 @@
         
         .toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: #272727;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
@@ -112,7 +109,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.75);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -128,26 +125,67 @@
             animation: imageZoom 0.3s ease;
         }
 
-        .close-preview {
-            position: absolute;
-            top: 20px;
+        #scrollToTopBtn {
+            position: fixed;
+            bottom: 50px;
             right: 20px;
-            background: #ff4444;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
+            background-color: #ffffff; /* 設置按鈕背景顏色 */
+            color: #3388BB;
+            border: 3px solid #3388BB; /* 設置邊框顏色和寬度 */
+            width: 60px;  /* 設置寬度 */
+            height: 60px; /* 設置高度 */
+            border-radius: 50%; /* 讓按鈕成正圓形 */
+            font-size: 24px; /* 設置字型大小 */
             display: flex;
-            align-items: center;
             justify-content: center;
-            transition: transform 0.2s;
+            align-items: center; /* 讓圖標居中 */
+            cursor: pointer;
+            transition: opacity 0.2s ease; /* 設置過渡效果 */
+            opacity: 0; /* 初始透明度為0 */
+            z-index: 200;
+        }
+    
+
+        #scrollToTopBtn:hover {
+            background-color: #bfbfbf; /* 當滑鼠懸停時變換背景顏色 */
+            transform: scale(1.1); /* 當滑鼠懸停時略微放大 */
         }
 
-        .close-preview:hover {
-            transform: scale(1.1);
+        .footer-links {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            background-color: #ffffff;
+            padding: 10px 0;
+        }
+
+        .footer-link-item {
+            list-style: none;
+        }
+
+        .footer-link-item a {
+            color: #3388BB;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 20px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .footer-link-item a:hover {
+            background-color: #3388BB;
+            color: white;
+        }
+
+        .footer-info {
+            position: absolute; /* 使用絕對定位 */
+            bottom: 10px; /* 位置距離底部10px */
+            right: 20px; /* 位置距離右邊20px */
+            color: #3388BB; /* 小字顏色 */
+            font-size: 12px; /* 字體大小 */
+            font-family: Arial, sans-serif; /* 字體樣式 */
+            text-align: right; /* 文字右對齊 */
         }
 
         @keyframes imageZoom {
@@ -181,14 +219,6 @@
                 max-width: 100%;
                 max-height: 70%;
             }
-            
-            .close-preview {
-                top: 10px;
-                right: 10px;
-                width: 30px;
-                height: 30px;
-                font-size: 20px;
-            }
         }
     </style>
 </head>
@@ -199,7 +229,23 @@
     </div>
 
     <div id="results"></div>
+    <button id="scrollToTopBtn">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    
     <div id="toast" class="toast"></div>
+
+    <div class="footer-links">
+        <div class="footer-link-item"><a href="https://ave-mujica-searcher.pages.dev/">Ave Mujica 台詞搜尋</a></div>
+        <div class="footer-link-item"><a href="#placeholder">問題回報</a></div>
+        <div class="footer-link-item"><a href="#placeholder">GitHub</a></div>
+        <div class="footer-link-item"><a href="#placeholder">placeholder</a></div>
+        <div class="footer-link-item"><a href="#placeholder">placeholder</a></div>
+
+        <div class="footer-info">
+            <p>版本: 1.0.0 | 更新日期: 2025年2月5日</p>
+        </div>
+    </div>
 
     <script>
         let images = [];
@@ -259,14 +305,8 @@
             img.src = imageSrc;
             img.className = 'preview-image';
             
-            // 關閉按鈕
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-preview';
-            closeBtn.innerHTML = '×';
-            
             // 組合元素
             overlay.appendChild(img);
-            overlay.appendChild(closeBtn);
             document.body.appendChild(overlay);
             
             // 關閉功能
@@ -277,7 +317,7 @@
             
             // 點擊事件
             overlay.addEventListener('click', (e) => {
-                if(e.target === overlay || e.target === closeBtn) {
+                if(e.target === overlay) {
                     closePreview();
                 }
             });
@@ -315,8 +355,12 @@
                 item.className = 'result-item';
 
                 const img = document.createElement('img');
-                img.src = `images/${filename}`;
+                img.src = `src/assets/images/${filename}`;
                 img.alt = filename;
+
+                img.onerror = () => {
+                    console.log(`Image ${filename} not found`);
+                };
 
                 img.addEventListener('click', () => {
                     createPreview(img.src);
@@ -345,8 +389,27 @@
             });
         });
 
+        window.onscroll = function() {
+            let scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+            // 判斷滾動位置
+            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+                setTimeout(function() {
+                    scrollToTopBtn.style.opacity = 1;  // 漸顯透明度
+                }, 5);  // 延遲設置透明度，讓過渡生效
+            } else {
+                scrollToTopBtn.style.opacity = 0;  // 減少透明度
+            }
+        };
+
+
+        // 點擊按鈕後回到頁面頂部
+        scrollToTopBtn.onclick = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         // 初始化載入資料
-        fetch("assets/data.json")
+        fetch("src/assets/data.json")
             .then(response => response.json())
             .then(data => images = data)
             .catch(() => showToast("無法載入資料"));
