@@ -8,11 +8,16 @@
     <!-- Font Awesome 圖標庫 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #3388BB;
+            --secondary-color: #ffffff;
+        }
+
         body { 
             font-family: 'Segoe UI', Arial, sans-serif; 
             margin: 0;
-            background: #3388BB;
-            color: white;
+            background: var(--primary-color);
+            color: var(--secondary-color);
         }
 
         #searchContainer {
@@ -27,11 +32,11 @@
             width: 100%;
             padding: 15px;
             font-size: 16px;
-            border: 2px solid #ffffff;
+            border: 2px solid var(--secondary-color);
             border-radius: 25px;
             outline: none;
             transition: border-color 0.3s;
-            background: rgba(255,255,255,0.9);
+            background: var(--secondary-color);
         }
         
         #results { 
@@ -78,7 +83,7 @@
             border: none;
             border-radius: 50%;
             background: #004488;
-            color: white;
+            color: #ffffff;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -97,7 +102,7 @@
             left: 50%;
             transform: translateX(-50%);
             background: #272727;
-            color: white;
+            color: #ffffff;
             padding: 10px 20px;
             border-radius: 5px;
             display: none;
@@ -130,9 +135,9 @@
             position: fixed;
             bottom: 50px;
             right: 20px;
-            background-color: #ffffff;
-            color: #3388BB;
-            border: 3px solid #3388BB;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 3px solid var(--primary-color);
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -155,7 +160,7 @@
             position: relative;
             display: flex;
             justify-content: center;
-            background-color: #ffffff;
+            background-color: var(--secondary-color);
             padding: 10px 0;
         }
 
@@ -164,7 +169,7 @@
         }
 
         .footer-link-item a {
-            color: #3388BB;
+            color: var(--primary-color);
             text-decoration: none;
             font-size: 16px;
             padding: 10px 20px;
@@ -174,15 +179,15 @@
         }
 
         .footer-link-item a:hover {
-            background-color: #3388BB;
-            color: white;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
         }
 
         .footer-info {
             position: absolute;
             bottom: 10px;
             right: 20px;
-            color: #3388BB;
+            color: var(--primary-color);
             font-size: 12px;
             font-family: Arial, sans-serif;
             text-align: right;
